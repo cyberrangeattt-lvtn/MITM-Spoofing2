@@ -14,7 +14,15 @@
       - curl        # HTTP GET basic-auth
       - cifs-utils  # mount Samba share (thường chưa có trên Ubuntu)
       - ftp         # FTP upload log
+      - cron        # Debian 12 không có sẵn
     state: present
+  become: true
+
+- name: Đảm bảo cron service đang chạy
+  ansible.builtin.service:
+    name: cron
+    state: started
+    enabled: true
   become: true
 
 # ── Chuẩn bị môi trường ───────────────────────────────────────────────────────
