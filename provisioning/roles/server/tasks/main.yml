@@ -31,7 +31,7 @@
 
 - name: Đặt Samba password cho alice
   ansible.builtin.shell: |
-    echo -e "{{ lab_password }}\n{{ lab_password }}" | smbpasswd -a -s {{ lab_user }}
+    printf '%s\n%s\n' "{{ lab_password }}" "{{ lab_password }}" | smbpasswd -a -s {{ lab_user }}
   become: true
   changed_when: false
 
