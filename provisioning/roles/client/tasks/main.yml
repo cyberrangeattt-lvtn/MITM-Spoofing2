@@ -67,7 +67,7 @@
     path: "{{ ftp_remote_dir }}"
     state: directory
     mode: '0755'
-  delegate_to: linux_server
+  delegate_to: server
   become: true
 
 # ── Đăng ký cron jobs — mỗi tác vụ chạy mỗi 60 giây ─────────────────────────
