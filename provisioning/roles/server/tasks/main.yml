@@ -1,0 +1,152 @@
+---
+# tasks/main.yml
+
+# ── Cài đặt gói ───────────────────────────────────────────────────────────────
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Cài các gói dịch vụ
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - apache2-utils
+      - samba
+      - snmpd
+      - vsftpd
+      - python3-passlib
+    state: present
+  become: true
+
+# ── User ──────────────────────────────────────────────────────────────────────
+- name: Tạo Linux user alice
+  ansible.builtin.user:
+    name: "{{ lab_user }}"
+    password: "{{ lab_password | password_hash('sha512') }}"
+    shell: /bin/bash
+    create_home: true
+  become: true
+
+- name: Đặt Samba password cho alice
+  ansible.builtin.shell: |
+    echo -e "{{ lab_password }}\n{{ lab_password }}" | smbpasswd -a -s {{ lab_user }}
+  become: true
+  changed_when: false
+
+- name: Deploy level5.txt vào home alice
+  ansible.builtin.copy:
+    src: alice/level5.txt
+    dest: "/home/{{ lab_user }}/level5.txt"
+    owner: "{{ lab_user }}"
+    mode: '0600'
+  become: true
+
+# ── Apache basic-auth ─────────────────────────────────────────────────────────
+- name: Tạo thư mục /portal
+  ansible.builtin.file:
+    path: "{{ apache_portal_path }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Deploy trang index cho /portal/
+  ansible.builtin.copy:
+    src: apache/portal_index.html
+    dest: "{{ apache_portal_path }}/index.html"
+    mode: '0644'
+  become: true
+
+- name: Tạo file .htpasswd với user alice
+  ansible.builtin.command:
+    cmd: htpasswd -bc {{ apache_htpasswd_file }} {{ lab_user }} {{ lab_password }}
+    creates: "{{ apache_htpasswd_file }}"
+  become: true
+
+- name: Deploy cấu hình VirtualHost
+  ansible.builtin.template:
+    src: apache_vhost.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+    mode: '0644'
+  become: true
+  notify: Restart apache2
+
+- name: Đảm bảo Apache đang chạy
+  ansible.builtin.service:
+    name: apache2
+    state: started
+    enabled: true
+  become: true
+
+# ── Samba ─────────────────────────────────────────────────────────────────────
+- name: Tạo thư mục share public và private
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+  loop:
+    - "{{ samba_public_path }}"
+    - "{{ samba_private_path }}"
+  become: true
+
+- name: Deploy secret.txt vào private share
+  ansible.builtin.copy:
+    src: samba/secret.txt
+    dest: "{{ samba_private_path }}/secret.txt"
+    owner: root
+    group: root
+    mode: '0640'
+  become: true
+
+- name: Deploy smb.conf
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    mode: '0644'
+  become: true
+  notify:
+    - Restart smbd
+    - Restart nmbd
+
+- name: Đảm bảo smbd và nmbd đang chạy
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - smbd
+    - nmbd
+  become: true
+
+# ── SNMP ──────────────────────────────────────────────────────────────────────
+- name: Deploy cấu hình snmpd
+  ansible.builtin.template:
+    src: snmpd.conf.j2
+    dest: /etc/snmp/snmpd.conf
+    mode: '0644'
+  become: true
+  notify: Restart snmpd
+
+- name: Đảm bảo snmpd đang chạy
+  ansible.builtin.service:
+    name: snmpd
+    state: started
+    enabled: true
+  become: true
+
+# ── FTP ───────────────────────────────────────────────────────────────────────
+- name: Deploy cấu hình vsftpd
+  ansible.builtin.template:
+    src: vsftpd.conf.j2
+    dest: /etc/vsftpd.conf
+    mode: '0644'
+  become: true
+  notify: Restart vsftpd
+
+- name: Đảm bảo vsftpd đang chạy
+  ansible.builtin.service:
+    name: vsftpd
+    state: started
+    enabled: true
+  become: true

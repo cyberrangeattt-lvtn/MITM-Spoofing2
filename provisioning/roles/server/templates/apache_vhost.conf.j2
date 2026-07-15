@@ -1,0 +1,10 @@
+<VirtualHost *:80>
+    DocumentRoot /var/www/html
+
+    <Directory "{{ apache_portal_path }}">
+        AuthType Basic
+        AuthName "Corporate Portal"
+        AuthUserFile {{ apache_htpasswd_file }}
+        Require valid-user
+    </Directory>
+</VirtualHost>

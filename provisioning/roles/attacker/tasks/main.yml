@@ -1,0 +1,59 @@
+- name: Adding aliases
+  loop: "{{ aliases | dict2items }}"
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.value }} {{ item.key }}"
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+ 
+# ── Level 2: SNMP Enumeration 
+- name: Install snmpwalk / snmp-mibs-downloader
+  ansible.builtin.apt:
+    name:
+      - snmp                   # cung cấp snmpwalk, snmpget
+      - snmp-mibs-downloader   # tải MIB để hiển thị OID dạng tên
+    state: present
+  become: true
+ 
+- name: Enable MIB loading trong snmp.conf
+  ansible.builtin.lineinfile:
+    path: /etc/snmp/snmp.conf
+    regexp: '^mibs\s*:'
+    line: 'mibs +'
+    create: true
+  become: true
+ 
+# ── Level 4: DNS Spoofing 
+- name: Install dsniff (cung cấp dnsspoof, arpspoof, dsniff)
+  ansible.builtin.apt:
+    name: dsniff
+    state: present
+  become: true
+  # Ghi chú: arpspoof cũng nằm trong gói này — cài một lần dùng được Level 3 & 4
+ 
+# ── Level 6: SMB Enumeration 
+- name: Install enum4linux
+  ansible.builtin.apt:
+    name: enum4linux
+    state: present
+  become: true
+ 
+# ── Tiện ích bổ sung cho lab 
+- name: Install python3-impacket (hỗ trợ SMB/FTP analysis nâng cao)
+  ansible.builtin.apt:
+    name: python3-impacket
+    state: present
+  become: true
+ 
+- name: Kiểm tra phiên bản các công cụ vừa cài
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - snmpwalk --version
+    - enum4linux --version
+  register: tool_versions
+  changed_when: false
+  failed_when: false

@@ -1,0 +1,10 @@
+#!/bin/bash
+# http_get.sh — Gửi HTTP GET kèm Basic Auth tới /portal/
+# Chạy tự động mỗi 60 giây qua cron
+
+curl -s -u "{{ lab_user }}:{{ lab_password }}" \
+     "{{ http_portal_url }}" \
+     -o /dev/null \
+     -w "%{http_code}" >> "{{ ftp_log_file }}" 2>&1
+
+echo " [$(date '+%F %T')] HTTP GET {{ http_portal_url }}" >> "{{ ftp_log_file }}"

@@ -1,0 +1,29 @@
+- name: Restart apache2
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+  become: true
+ 
+- name: Restart smbd
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+  become: true
+ 
+- name: Restart nmbd
+  ansible.builtin.service:
+    name: nmbd
+    state: restarted
+  become: true
+ 
+- name: Restart snmpd
+  ansible.builtin.service:
+    name: snmpd
+    state: restarted
+  become: true
+ 
+- name: Restart vsftpd
+  ansible.builtin.service:
+    name: vsftpd
+    state: restarted
+  become: true

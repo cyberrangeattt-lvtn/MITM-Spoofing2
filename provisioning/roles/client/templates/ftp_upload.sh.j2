@@ -1,0 +1,19 @@
+#!/bin/bash
+# ftp_upload.sh — Upload file log lên linux-server qua FTP
+# Chạy tự động mỗi 60 giây qua cron
+
+LOG_FILE="{{ ftp_log_file }}"
+FTP_HOST="{{ ftp_host }}"
+FTP_USER="{{ lab_user }}"
+FTP_PASS="{{ lab_password }}"
+REMOTE_DIR="{{ ftp_remote_dir }}"
+
+ftp -n "$FTP_HOST" << FTP_CMDS
+quote USER $FTP_USER
+quote PASS $FTP_PASS
+cd $REMOTE_DIR
+put $LOG_FILE
+bye
+FTP_CMDS
+
+echo "[$(date '+%F %T')] FTP upload $LOG_FILE -> $FTP_HOST:$REMOTE_DIR" >> "$LOG_FILE"

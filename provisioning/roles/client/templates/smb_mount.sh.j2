@@ -1,0 +1,16 @@
+#!/bin/bash
+# smb_mount.sh — Mount Samba public share từ linux-server
+# Chạy tự động mỗi 60 giây qua cron
+
+MOUNT_POINT="{{ smb_mount_point }}"
+SHARE="{{ smb_share }}"
+
+# Mount nếu chưa được mount
+if ! mountpoint -q "$MOUNT_POINT"; then
+    mount -t cifs "$SHARE" "$MOUNT_POINT" \
+        -o username={{ lab_user }},password={{ lab_password }},vers=3.0 \
+        >> "{{ ftp_log_file }}" 2>&1
+    echo "[$(date '+%F %T')] Mounted $SHARE -> $MOUNT_POINT" >> "{{ ftp_log_file }}"
+else
+    echo "[$(date '+%F %T')] $MOUNT_POINT already mounted" >> "{{ ftp_log_file }}"
+fi

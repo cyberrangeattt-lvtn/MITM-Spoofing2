@@ -1,0 +1,8 @@
+---
+# handlers/main.yml
+
+- name: Reload cron
+  ansible.builtin.service:
+    name: cron
+    state: restarted
+  become: true

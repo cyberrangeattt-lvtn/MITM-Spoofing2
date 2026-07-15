@@ -1,0 +1,28 @@
+
+
+---
+# ── User ──────────────────────────────────────────────────────────────────────
+lab_user: alice
+lab_password: "R3dSt4pl3r99"
+
+# ── Apache ────────────────────────────────────────────────────────────────────
+apache_portal_path: /var/www/html/portal
+apache_htpasswd_file: /etc/apache2/.htpasswd
+
+# ── Samba ─────────────────────────────────────────────────────────────────────
+samba_netbios_name: filesrv-corp
+samba_public_path: /srv/samba/public
+samba_private_path: /srv/samba/private
+
+# ── SNMP ──────────────────────────────────────────────────────────────────────
+snmp_community: public
+snmp_contact: sysadmin@corp.local
+snmp_location: "Lab Environment"
+
+# ── FTP ───────────────────────────────────────────────────────────────────────
+ftp_pasv_min: 40000
+ftp_pasv_max: 40100
+
+aliases:
+  server: 10.1.26.10
+routings: []

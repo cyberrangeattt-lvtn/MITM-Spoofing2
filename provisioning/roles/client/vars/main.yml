@@ -1,0 +1,24 @@
+---
+# vars/main.yml
+# ── User / credentials ────────────────────────────────────────────────────────
+lab_user: alice
+lab_password: "R3dSt4pl3r99"
+
+# ── HTTP ──────────────────────────────────────────────────────────────────────
+http_portal_url: "http://10.0.0.10/portal/"
+
+# ── Samba ─────────────────────────────────────────────────────────────────────
+smb_share: "//10.0.0.10/public"
+smb_mount_point: /mnt/samba_share
+
+# ── FTP ───────────────────────────────────────────────────────────────────────
+ftp_host: "10.0.0.10"
+ftp_log_file: /var/log/client_activity.log
+ftp_remote_dir: /uploads
+
+# ── Script paths ──────────────────────────────────────────────────────────────
+script_dir: /opt/lab_client
+
+aliases:
+  server: 10.1.26.20
+routings: []

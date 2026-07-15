@@ -1,0 +1,99 @@
+---
+# tasks/main.yml
+
+# ── Cài đặt gói ───────────────────────────────────────────────────────────────
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Cài các gói cần thiết
+  ansible.builtin.apt:
+    name:
+      - curl        # HTTP GET basic-auth
+      - cifs-utils  # mount Samba share (thường chưa có trên Ubuntu)
+      - ftp         # FTP upload log
+    state: present
+  become: true
+
+# ── Chuẩn bị môi trường ───────────────────────────────────────────────────────
+- name: Tạo thư mục chứa scripts
+  ansible.builtin.file:
+    path: "{{ script_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Tạo mount point cho Samba
+  ansible.builtin.file:
+    path: "{{ smb_mount_point }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Tạo file log ban đầu
+  ansible.builtin.file:
+    path: "{{ ftp_log_file }}"
+    state: touch
+    mode: '0644'
+  become: true
+
+# ── Deploy scripts từ templates ───────────────────────────────────────────────
+- name: Deploy script HTTP GET
+  ansible.builtin.template:
+    src: http_get.sh.j2
+    dest: "{{ script_dir }}/http_get.sh"
+    mode: '0755'
+  become: true
+
+- name: Deploy script Samba mount
+  ansible.builtin.template:
+    src: smb_mount.sh.j2
+    dest: "{{ script_dir }}/smb_mount.sh"
+    mode: '0755'
+  become: true
+
+- name: Deploy script FTP upload
+  ansible.builtin.template:
+    src: ftp_upload.sh.j2
+    dest: "{{ script_dir }}/ftp_upload.sh"
+    mode: '0755'
+  become: true
+
+# ── Tạo thư mục uploads trên server qua FTP (tránh lỗi cd) ───────────────────
+- name: Tạo thư mục /uploads trên FTP server
+  ansible.builtin.file:
+    path: "{{ ftp_remote_dir }}"
+    state: directory
+    mode: '0755'
+  delegate_to: linux_server
+  become: true
+
+# ── Đăng ký cron jobs — mỗi tác vụ chạy mỗi 60 giây ─────────────────────────
+- name: Cron — HTTP GET tới /portal/ mỗi phút
+  ansible.builtin.cron:
+    name: "lab2_http_get"
+    job: "{{ script_dir }}/http_get.sh"
+    minute: "* "
+    user: root
+  become: true
+  notify: Reload cron
+
+- name: Cron — Mount Samba share mỗi phút
+  ansible.builtin.cron:
+    name: "lab2_smb_mount"
+    job: "{{ script_dir }}/smb_mount.sh"
+    minute: "*"
+    user: root
+  become: true
+  notify: Reload cron
+
+- name: Cron — FTP upload log mỗi phút
+  ansible.builtin.cron:
+    name: "lab2_ftp_upload"
+    job: "{{ script_dir }}/ftp_upload.sh"
+    minute: "*"
+    user: root
+  become: true
+  notify: Reload cron

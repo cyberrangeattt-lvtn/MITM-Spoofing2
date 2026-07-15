@@ -1,0 +1,22 @@
+[global]
+    workgroup = CORP
+    netbios name = {{ samba_netbios_name }}
+    server string = Lab File Server
+    security = user
+    map to guest = bad user
+    log level = 1
+
+[public]
+    path = {{ samba_public_path }}
+    browseable = yes
+    writable = yes
+    guest ok = yes
+    comment = Public Share
+
+[private]
+    path = {{ samba_private_path }}
+    browseable = yes
+    writable = no
+    guest ok = no
+    valid users = {{ lab_user }}
+    comment = Private Share (auth required)
