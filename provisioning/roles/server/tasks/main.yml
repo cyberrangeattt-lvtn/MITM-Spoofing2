@@ -151,13 +151,13 @@
 #     mode: '0640'
 #   become: true
 
-- name: Deploy secret.txt với owner aya
+- name: Deploy secret.txt với owner root
   ansible.builtin.copy:
     src: samba/secret.txt
     dest: "{{ samba_private_path }}/secret.txt"
-    owner: aya
-    group: mortar
-    mode: '0640'
+    owner: root
+    group: root
+    mode: '0644'
   become: true
 
 - name: Deploy smb.conf
