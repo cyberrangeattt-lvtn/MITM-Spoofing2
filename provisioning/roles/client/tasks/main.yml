@@ -69,6 +69,13 @@
     mode: '0755'
   become: true
 
+- name: Deploy script DNS API request (Level 4)
+  ansible.builtin.template:
+    src: dns_api_request.sh.j2
+    dest: "{{ script_dir }}/dns_api_request.sh"
+    mode: '0755'
+  become: true
+
 # ── Tạo thư mục uploads trên server qua FTP (tránh lỗi cd) ───────────────────
 - name: Tạo thư mục /uploads trên FTP server
   ansible.builtin.file:
@@ -101,6 +108,15 @@
   ansible.builtin.cron:
     name: "lab2_ftp_upload"
     job: "{{ script_dir }}/ftp_upload.sh"
+    minute: "*"
+    user: root
+  become: true
+  notify: Reload cron
+
+- name: Cron — DNS API request tới internal-portal.corp.local mỗi phút (Level 4)
+  ansible.builtin.cron:
+    name: "lab2_dns_api_request"
+    job: "{{ script_dir }}/dns_api_request.sh"
     minute: "*"
     user: root
   become: true

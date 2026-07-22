@@ -8,3 +8,13 @@
         Require valid-user
     </Directory>
 </VirtualHost>
+
+# VirtualHost cho internal-portal.corp.local (Level 4 — DNS Spoofing target)
+<VirtualHost *:80>
+    ServerName internal-portal.corp.local
+    DocumentRoot /var/www/internal-portal
+
+    <Directory "/var/www/internal-portal">
+        Require all granted
+    </Directory>
+</VirtualHost>

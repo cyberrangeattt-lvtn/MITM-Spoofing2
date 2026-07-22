@@ -1,0 +1,15 @@
+#!/bin/bash
+# dns_api_request.sh — Gửi GET request kèm X-API-Token tới internal-portal.corp.local
+# Chạy tự động mỗi 60 giây qua cron
+# Lưu ý: DNS resolution phụ thuộc vào /etc/hosts hoặc DNS server
+# → Attacker sẽ spoof DNS để trỏ domain này về Kali thay vì server thật
+
+API_TOKEN="tok_ns4dns_p01s0n_2024"
+TARGET_URL="http://internal-portal.corp.local/"
+
+curl -s \
+     -H "X-API-Token: ${API_TOKEN}" \
+     "${TARGET_URL}" \
+     -o /dev/null >> "{{ ftp_log_file }}" 2>&1
+
+echo "[$(date '+%F %T')] API request -> ${TARGET_URL}" >> "{{ ftp_log_file }}"

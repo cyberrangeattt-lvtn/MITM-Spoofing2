@@ -82,20 +82,20 @@
     state: directory
     mode: '0755'
   become: true
-
+ 
 - name: Deploy trang index cho /portal/
   ansible.builtin.copy:
     src: apache/portal_index.html
     dest: "{{ apache_portal_path }}/index.html"
     mode: '0644'
   become: true
-
+ 
 - name: Tạo file .htpasswd với user alice
   ansible.builtin.command:
     cmd: htpasswd -bc {{ apache_htpasswd_file }} {{ lab_user }} {{ lab_password }}
     creates: "{{ apache_htpasswd_file }}"
   become: true
-
+ 
 - name: Deploy cấu hình VirtualHost
   ansible.builtin.template:
     src: apache_vhost.conf.j2
@@ -103,7 +103,27 @@
     mode: '0644'
   become: true
   notify: Restart apache2
-
+ 
+- name: Tạo thư mục /var/www/internal-portal
+  ansible.builtin.file:
+    path: /var/www/internal-portal
+    state: directory
+    mode: '0755'
+  become: true
+ 
+- name: Deploy trang index cho internal-portal
+  ansible.builtin.copy:
+    src: apache/internal_portal_index.html
+    dest: /var/www/internal-portal/index.html
+    mode: '0644'
+  become: true
+ 
+- name: Bật mod headers (cần để Apache ghi nhận custom header)
+  ansible.builtin.command:
+    cmd: a2enmod headers
+  become: true
+  notify: Restart apache2
+ 
 - name: Đảm bảo Apache đang chạy
   ansible.builtin.service:
     name: apache2
