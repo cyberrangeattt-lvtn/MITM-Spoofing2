@@ -29,6 +29,29 @@
     create_home: true
   become: true
 
+- name: Tạo group mortar
+  ansible.builtin.group:
+    name: mortar
+    state: present
+  become: true
+
+- name: Tạo user aya
+  ansible.builtin.user:
+    name: aya
+    password: "{{ lab_password2 | password_hash('sha512') }}"
+    groups: mortar
+    append: true
+    shell: /bin/bash
+    create_home: true
+  become: true
+
+- name: Thêm alice vào group mortar
+  ansible.builtin.user:
+    name: alice
+    groups: mortar
+    append: true
+  become: true
+
 - name: Đặt Samba password cho alice
   ansible.builtin.shell: |
     printf '%s\n%s\n' "{{ lab_password }}" "{{ lab_password }}" | smbpasswd -a -s {{ lab_user }}
@@ -42,6 +65,15 @@
     owner: "{{ lab_user }}"
     mode: '0600'
   become: true
+
+- name: Bật PasswordAuthentication cho SSH
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication yes'
+    state: present
+  become: true
+  notify: Restart sshd
 
 # ── Apache basic-auth ─────────────────────────────────────────────────────────
 - name: Tạo thư mục /portal
@@ -90,12 +122,21 @@
     - "{{ samba_private_path }}"
   become: true
 
-- name: Deploy secret.txt vào private share
+# - name: Deploy secret.txt vào private share
+#   ansible.builtin.copy:
+#     src: samba/secret.txt
+#     dest: "{{ samba_private_path }}/secret.txt"
+#     owner: root
+#     group: root
+#     mode: '0640'
+#   become: true
+
+- name: Deploy secret.txt với owner aya
   ansible.builtin.copy:
     src: samba/secret.txt
     dest: "{{ samba_private_path }}/secret.txt"
-    owner: root
-    group: root
+    owner: aya
+    group: mortar
     mode: '0640'
   become: true
 

@@ -5,6 +5,7 @@ lab_subnet: "10.1.26.0/24"
 # ── User ──────────────────────────────────────────────────────────────────────
 lab_user: alice
 lab_password: "R3dSt4pl3r99"
+lab_password2: "Rd6J973I1008"
 
 # ── Apache ────────────────────────────────────────────────────────────────────
 apache_portal_path: /var/www/html/portal

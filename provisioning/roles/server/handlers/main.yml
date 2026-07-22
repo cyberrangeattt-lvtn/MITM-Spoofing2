@@ -27,3 +27,9 @@
     name: vsftpd
     state: restarted
   become: true
+
+- name: Restart sshd
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+  become: true
