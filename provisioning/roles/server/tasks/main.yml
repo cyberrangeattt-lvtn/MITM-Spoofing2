@@ -75,6 +75,12 @@
   become: true
   notify: Restart sshd
 
+- name: Restart ssh ngay lập tức
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+  become: true
+
 # ── Apache basic-auth ─────────────────────────────────────────────────────────
 - name: Tạo thư mục /portal
   ansible.builtin.file:
